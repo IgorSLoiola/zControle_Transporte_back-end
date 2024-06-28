@@ -4,7 +4,7 @@ from flask_login import login_user, current_user, logout_user, login_required, L
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import user, vehicles
 from app.database import db
-from app.auth import generate_token
+from app.auth import generate_token, verify_token
 
 
 approutes = Blueprint('users', __name__)
@@ -77,6 +77,15 @@ def get_user(user_id):
         })
     else:
         return jsonify({'message': 'User not found'}), 404
+    
+@approutes.route('/protected')
+def protected():
+    token = request.headers.get('Authorization')
+    if token:
+        data = verify_token(token)
+        if data:
+            return jsonify({'message': 'Token is valid!'})
+    return jsonify({'message': 'is not token valid'})
 
 #vehicles
 @approutes.route('/vehicles', methods=['GET'])
